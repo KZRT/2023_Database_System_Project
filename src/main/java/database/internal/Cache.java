@@ -2,70 +2,97 @@ package database.internal;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 
 public class Cache {
     private final ArrayList<Buffer> buffers;
     private final ArrayList<Integer> lruIndex;
-    private int pinnedIndex = -1;
-    private int fileIndex = 0;
+    private int fileIndex;
+    private int bufferIndex;
     private static final int CACHE_SIZE = 4;
     private static Cache instance;
 
     private Cache(){
         this.buffers = new ArrayList<>(CACHE_SIZE);
         this.lruIndex = new ArrayList<>(CACHE_SIZE);
+        this.fileIndex = 0;
+        this.bufferIndex = 0;
     }
 
-    private void updateLRU(int index){
-        lruIndex.replaceAll(i -> i + 1);
-        lruIndex.set(index, 0);
-    }
-
-    private int getLRUIndex(){
-        ArrayList<Integer> temp = new ArrayList<>();
-        for(int i = 0; i < CACHE_SIZE; i++){
-            if(buffers.get(i).getType() != BufferType.PINNED) temp.add(i);
+    public boolean isBufferAvailable(int count) {
+        if (countAvailableBuffer() >= count) return true;
+        else {
+            dumpCache();
+            return countAvailableBuffer() >= count;
         }
-        int max = 0;
-        for(int i : temp) if(lruIndex.get(i) > max) max = lruIndex.get(i);
-        return lruIndex.indexOf(max);
     }
 
-
-    public Buffer getBuffer(int index){
-        updateLRU(index);
-        return buffers.get(index);
-    }
-
-    public void setBuffer(int index, Buffer buffer){
-        buffers.set(index, buffer);
-    }
-
-    public boolean isFull(){
-        for (Buffer buffer : buffers) {
-            if (!buffer.isFull()) return false;
+    private int countAvailableBuffer(){
+        int count = 0;
+        for(Buffer buffer : buffers){
+            if(buffer.getType() == BufferType.FREE) count++;
         }
-        return true;
+        return count;
     }
 
-
-    public boolean writeBlock(long block){
-        if(pinnedIndex < 0) pinnedIndex = getLRUIndex();
-        if(buffers.get(pinnedIndex).isFull()) {
-            buffers.get(pinnedIndex).setType(BufferType.WRITE);
-        } else {
-            buffers.get(pinnedIndex).getBlocks().add(block);
+    private void dumpCache(){
+        for(Buffer buffer : buffers){
+            if(buffer.getType() == BufferType.WRITE){
+                buffer.writeBuffer();
+                buffer.clearBuffer();
+                buffer.setType(BufferType.FREE);
+            }
         }
-        return false;
     }
 
-    public void clearCache(){
-        buffers.clear();
-        lruIndex.clear();
+    public void releaseCache(){
+        dumpCache();
         fileIndex = 0;
+        bufferIndex = 0;
+        for(Buffer buffer : buffers){
+            buffer.setType(BufferType.FREE);
+        }
     }
 
+    public int acquireBuffer(String fileName){
+        int cycleTime = 0;
+        while (true){
+            if(bufferIndex >= CACHE_SIZE) bufferIndex = 0;
+            if(buffers.get(bufferIndex).getType() == BufferType.FREE){
+                buffers.get(bufferIndex).prepareBuffer(fileName);
+                buffers.get(bufferIndex).setType(BufferType.PINNED);
+                return bufferIndex;
+            }
+            bufferIndex++;
+            cycleTime++;
+            if(cycleTime >= CACHE_SIZE) throw new BufferPinnedError(fileName, fileIndex, bufferIndex);
+        }
+    }
+
+    public boolean isBufferFull(int bufferIndex){
+        return buffers.get(bufferIndex).isBufferFull();
+    }
+
+
+    public void releaseBuffer(int bufferIndex, boolean write){
+        if(write) buffers.get(bufferIndex).setType(BufferType.WRITE);
+        else buffers.get(bufferIndex).setType(BufferType.FREE);
+    }
+
+    public int readBuffer(int bufferIndex){
+        return buffers.get(bufferIndex).readFile();
+    }
+
+    public long getNextBlock(int bufferIndex) throws BufferOverflowError{
+        return buffers.get(bufferIndex).getNextBlock();
+    }
+
+    public boolean writeBlockToBuffer(int bufferIndex, long block){
+        return buffers.get(bufferIndex).writeNextBlock(block);
+    }
+
+    public void increaseIndex(int fileIndex){
+        this.fileIndex += fileIndex;
+    }
 
     public static Cache getInstance(){
         if(instance == null){
@@ -75,34 +102,4 @@ public class Cache {
     }
 
 
-    private boolean resizeCache(){
-        if(isFull()){
-            for(int i = 0; i < CACHE_SIZE; i++){
-                int index = getLRUIndex();
-                Buffer buffer = buffers.get(index);
-                switch (buffer.getType()) {
-                    case FREE -> {
-                        return true;
-                    }
-                    case WRITE -> {
-                        try {
-                            buffer.writeFullBuffer();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        buffer.setType(BufferType.FREE);
-                        return true;
-                    }
-                    case PINNED -> {
-                        continue;
-                    }
-                }
-                buffers.set(index, null);
-                lruIndex.set(index, null);
-                return true;
-            }
-        } else return true;
-
-        return false;
-    }
 }
