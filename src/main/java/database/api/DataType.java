@@ -1,4 +1,4 @@
-package database.internal;
+package database.api;
 
 public interface DataType {
     public DataType getRange(long specificValue);

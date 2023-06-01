@@ -1,4 +1,4 @@
-package database.internal;
+package database.api;
 
 public enum Sex implements DataType {
     NOT_KNOWN((short) 0), MALE((short) 1), FEMALE((short) 2), NOT_APPLICABLE((short) 9);

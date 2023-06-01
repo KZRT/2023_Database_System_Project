@@ -1,4 +1,4 @@
-package database.internal;
+package database.api;
 
 public enum AgeRange implements DataType {
     BABIES((short)0, (short)10), TEEN((short)10, (short)20), TWENTIES((short)20, (short)30),

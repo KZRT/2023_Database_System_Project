@@ -1,13 +1,13 @@
-package database.cli;
+package database.cli.test;
 
 import database.api.ShoppingMallDatabaseTest;
 import database.api.ShoppingMallDatabaseTestAPI;
 
 class TestCreateTableMenu implements State {
     private final ShoppingMallDatabaseTestAPI api = ShoppingMallDatabaseTest.getInstance();
-    private final ConsoleInterface ci;
+    private final TestConsoleInterface ci;
 
-    protected TestCreateTableMenu(ConsoleInterface ci) {
+    protected TestCreateTableMenu(TestConsoleInterface ci) {
         this.ci = ci;
     }
 
@@ -25,7 +25,7 @@ class TestCreateTableMenu implements State {
 
     @Override
     public boolean nextInput(int i) {
-        ci.changeState(ci.testMenu);
+        ci.changeState(ci.mainMenu);
         return true;
     }
 }

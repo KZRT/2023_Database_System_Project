@@ -1,17 +1,14 @@
-package database.cli.test;
+package database.cli;
 
-import database.api.ShoppingMallDatabase;
-import database.api.ShoppingMallDatabaseAPI;
-import database.api.ShoppingMallDatabaseTest;
-import database.api.ShoppingMallDatabaseTestAPI;
+import database.api.*;
 
-class TestCountOneDatatypeMenu implements TriggerState {
-    private TestConsoleInterface ci;
+class CountOneDatatypeMenu implements TriggerState {
+    private ConsoleInterface ci;
     private ShoppingMallDatabaseAPI api = ShoppingMallDatabase.getInstance();
     private ShoppingMallDatabaseTestAPI testApi = ShoppingMallDatabaseTest.getInstance();
     private boolean trigger = false;
 
-    protected TestCountOneDatatypeMenu(TestConsoleInterface ci) {
+    protected CountOneDatatypeMenu(ConsoleInterface ci) {
         this.ci = ci;
     }
 
@@ -36,18 +33,14 @@ class TestCountOneDatatypeMenu implements TriggerState {
                 ci.abortAllOperations();
                 return true;
             }
-            System.out.println("Testing Count One Datatype");
             System.out.println("Selected Query: ");
             System.out.println("SELECT COUNT(*) FROM users WHERE " + ShoppingMallDatabaseTest.dataTypeToQueryString(ci.getDataType(0)));
-
+            long startTime = System.currentTimeMillis();
             long count = api.countDatatype(ci.getDataType(0));
+            long endTime = System.currentTimeMillis();
+            System.out.println("Time taken: " + (endTime - startTime) + " ms");
             System.out.println("Count: " + count);
-            if (testApi.testCountDatatype(ci.getDataType(0), count)) {
-                System.out.println("Test Passed");
-            } else {
-                System.out.println("Test Failed");
-            }
-            System.out.println("For Return to Test Menu, Press 0");
+            System.out.println("Press 0 to continue");
             return false;
         }
         switch (i) {

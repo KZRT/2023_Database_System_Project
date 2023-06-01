@@ -5,14 +5,16 @@ import java.util.ArrayList;
 class Buffer {
     private final ArrayList<Long> blocks;
     private int blockIndex;
+    private int blockSize;
     private File file;
     private BufferType type;
-    private final static String fileLocation = "/buffer";
+    private final static String fileLocation = "buffer/";
     public final static int BLOCK_SIZE = 4;
 
     protected Buffer(BufferType type, String fileName){
         this.blocks = new ArrayList<>(BLOCK_SIZE);
         this.blockIndex = 0;
+        this.blockSize = 0;
         this.file = new File(fileLocation + fileName);
         this.type = BufferType.FREE;
     }
@@ -27,7 +29,9 @@ class Buffer {
 
     protected void clearBuffer(){
         this.blocks.clear();
+        for (int i = 0; i < BLOCK_SIZE; i++) blocks.add(0L);
         this.blockIndex = 0;
+        this.blockSize = 0;
     }
 
     protected void prepareBuffer(String fileName){
@@ -43,31 +47,44 @@ class Buffer {
     protected boolean writeNextBlock(long block) throws BufferOverflowError{
         if(blockIndex >= BLOCK_SIZE) throw new BufferOverflowError(file.getName(), blockIndex);
         blocks.set(blockIndex++, block);
-        return true;
+        return isBufferFull();
     }
 
     protected int readFile() {
         if (!file.exists()) return -1;
-        DataInputStream dataInputStream;
+        BufferedInputStream bufferedInputStream = null;
         try {
-            dataInputStream = new DataInputStream(new FileInputStream(file));
-            while (dataInputStream.available() > 0) {
-                blocks.add(dataInputStream.readLong());
+            bufferedInputStream = new BufferedInputStream(new FileInputStream(file));
+            byte[] buffer = new byte[1024];
+            byte[] temp = new byte[1024];
+            int i = 0;
+            while(bufferedInputStream.read(buffer) != -1){
+                for(byte b : buffer){
+                    temp[i++] = b;
+                    if(b == '\n') {
+                        blockSize++;
+                        blocks.set(blockIndex++, Long.parseLong(new String(temp, 0, i).trim()));
+                        i = 0;
+                        temp = new byte[1024];
+                    }
+                }
             }
-            return blocks.size();
+            bufferedInputStream.close();
+            this.blockIndex = 0;
+            return blockSize;
         } catch (IOException ignored) {
         }
         return -1;
     }
 
     protected void writeBuffer(){
-        DataOutputStream dataOutputStream = null;
+        BufferedOutputStream bufferedOutputStream = null;
         try {
-            dataOutputStream = new DataOutputStream(new FileOutputStream(file));
-            for(long block : blocks){
-                dataOutputStream.writeLong(block);
+            bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(file));
+            for(int i = 0; i < blockIndex; i++){
+                bufferedOutputStream.write((blocks.get(i) + "\n").getBytes());
             }
-            dataOutputStream.close();
+            bufferedOutputStream.close();
         } catch (IOException ignored) {
         }
     }
@@ -76,4 +93,7 @@ class Buffer {
         return blockIndex >= BLOCK_SIZE;
     }
 
+    protected int getBlockIndex() {
+        return blockIndex;
+    }
 }

@@ -1,17 +1,17 @@
 package database.cli.test;
 
-import database.api.ShoppingMallDatabase;
-import database.api.ShoppingMallDatabaseAPI;
-import database.api.ShoppingMallDatabaseTest;
-import database.api.ShoppingMallDatabaseTestAPI;
+import database.api.*;
 
-class TestCountOneDatatypeMenu implements TriggerState {
+import java.util.ArrayList;
+
+class TestSelectOneDatatypeMenu implements TriggerState {
     private TestConsoleInterface ci;
     private ShoppingMallDatabaseAPI api = ShoppingMallDatabase.getInstance();
     private ShoppingMallDatabaseTestAPI testApi = ShoppingMallDatabaseTest.getInstance();
+    private ArrayList<User> users;
     private boolean trigger = false;
 
-    protected TestCountOneDatatypeMenu(TestConsoleInterface ci) {
+    protected TestSelectOneDatatypeMenu(TestConsoleInterface ci) {
         this.ci = ci;
     }
 
@@ -32,22 +32,20 @@ class TestCountOneDatatypeMenu implements TriggerState {
             if (i == 0) {
                 trigger = false;
                 ci.changeState(ci.mainMenu);
+                users = null;
                 ci.countStateOccured = false;
                 ci.abortAllOperations();
                 return true;
             }
-            System.out.println("Testing Count One Datatype");
+            System.out.println("Testing Select One Datatype");
             System.out.println("Selected Query: ");
-            System.out.println("SELECT COUNT(*) FROM users WHERE " + ShoppingMallDatabaseTest.dataTypeToQueryString(ci.getDataType(0)));
-
-            long count = api.countDatatype(ci.getDataType(0));
-            System.out.println("Count: " + count);
-            if (testApi.testCountDatatype(ci.getDataType(0), count)) {
+            System.out.println("SELECT * FROM users WHERE " + ShoppingMallDatabaseTest.dataTypeToQueryString(ci.getDataType(0)));
+            users = api.selectDatatype(ci.getDataType(0));
+            if(testApi.testSelectedDatatype(ci.getDataType(0), users))
                 System.out.println("Test Passed");
-            } else {
+            else
                 System.out.println("Test Failed");
-            }
-            System.out.println("For Return to Test Menu, Press 0");
+            System.out.println("Press 0 to go back to main menu");
             return false;
         }
         switch (i) {
@@ -76,4 +74,3 @@ class TestCountOneDatatypeMenu implements TriggerState {
     }
 
 }
-

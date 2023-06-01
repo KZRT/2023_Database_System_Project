@@ -1,25 +1,26 @@
-package database.cli;
+package database.cli.test;
 
-import database.api.ShoppingMallDatabase;
-import database.api.ShoppingMallDatabaseAPI;
+import database.api.ShoppingMallDatabaseTest;
+import database.api.ShoppingMallDatabaseTestAPI;
 
 class TestCreateBitmapIndexMenu implements State {
-    private ShoppingMallDatabaseAPI api = ShoppingMallDatabase.getInstance();
-    private ConsoleInterface ci;
+    private ShoppingMallDatabaseTestAPI api = ShoppingMallDatabaseTest.getInstance();
+    private TestConsoleInterface ci;
 
-    protected TestCreateBitmapIndexMenu(ConsoleInterface ci) {
+    protected TestCreateBitmapIndexMenu(TestConsoleInterface ci) {
         this.ci = ci;
     }
 
     @Override
     public void printScreen() {
-        System.out.println("Bitmap Index Creation");
+        System.out.println("Testing Bitmap Index Creation");
 
-        long startTime = System.nanoTime();
-        api.createBitmapIndex();
-        long endTime = System.nanoTime();
-        System.out.println("Time taken: " + (endTime - startTime) + " ns");
-        System.out.println("For Return to Main Menu, Press 0");
+        if(api.testCreatedBitmapIndex()){
+            System.out.println("Bitmap Index Created Successfully");
+        } else {
+            System.out.println("Bitmap Index Creation Failed");
+        }
+        System.out.println("For Return to Test Menu, Press 0");
     }
 
     @Override

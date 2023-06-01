@@ -1,11 +1,11 @@
-package database.cli.test;
+package database.cli;
 
 import database.api.MemberClass;
 
-class TestSelectMemberClassMenu implements State {
-    private TestConsoleInterface ci;
+class SelectMemberClassMenu implements State {
+    private ConsoleInterface ci;
 
-    protected TestSelectMemberClassMenu(TestConsoleInterface ci) {
+    protected SelectMemberClassMenu(ConsoleInterface ci) {
         this.ci = ci;
     }
 

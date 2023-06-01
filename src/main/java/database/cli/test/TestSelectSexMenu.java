@@ -1,33 +1,31 @@
 package database.cli.test;
 
-import database.api.MemberClass;
+import database.api.Sex;
 
-class TestSelectMemberClassMenu implements State {
+class TestSelectSexMenu implements State {
     private TestConsoleInterface ci;
 
-    protected TestSelectMemberClassMenu(TestConsoleInterface ci) {
+    protected TestSelectSexMenu(TestConsoleInterface ci) {
         this.ci = ci;
     }
 
     @Override
     public void printScreen() {
-        System.out.println("Selecting Age Range");
+        System.out.println("Selecting Sex");
         System.out.println("Please select an option:");
-        System.out.println("1. Bronze (0 - 10000)");
-        System.out.println("2. Silver (10000 - 50000)");
-        System.out.println("3. Gold (50000 - 100000)");
-        System.out.println("4. Platinum (100000 - 500000)");
-        System.out.println("5. Diamond (500000 - 1000000)");
-        System.out.println("6. VIP (1000000 - )");
-        System.out.println("7. Return to Previous Menu");
-        System.out.println("8. Abort All Operations");
+        System.out.println("1. Not Known");
+        System.out.println("2. Male");
+        System.out.println("3. Female");
+        System.out.println("4. Not Applicable");
+        System.out.println("5. Return to Previous Menu");
+        System.out.println("6. Abort All Operations");
     }
 
     @Override
     public boolean nextInput(int i) {
         switch (i) {
             case 1:
-                ci.addDataType(MemberClass.BRONZE);
+                ci.addDataType(Sex.NOT_KNOWN);
                 if (!ci.multiDatatypeStateOccured) {
                     if (ci.countStateOccured) ci.changeState(ci.countOneDatatypeMenu);
                     else ci.changeState(ci.selectOneDatatypeMenu);
@@ -36,7 +34,7 @@ class TestSelectMemberClassMenu implements State {
                 }
                 return true;
             case 2:
-                ci.addDataType(MemberClass.SILVER);
+                ci.addDataType(Sex.MALE);
                 if (!ci.multiDatatypeStateOccured) {
                     if (ci.countStateOccured) ci.changeState(ci.countOneDatatypeMenu);
                     else ci.changeState(ci.selectOneDatatypeMenu);
@@ -45,7 +43,7 @@ class TestSelectMemberClassMenu implements State {
                 }
                 return true;
             case 3:
-                ci.addDataType(MemberClass.GOLD);
+                ci.addDataType(Sex.FEMALE);
                 if (!ci.multiDatatypeStateOccured) {
                     if (ci.countStateOccured) ci.changeState(ci.countOneDatatypeMenu);
                     else ci.changeState(ci.selectOneDatatypeMenu);
@@ -54,7 +52,7 @@ class TestSelectMemberClassMenu implements State {
                 }
                 return true;
             case 4:
-                ci.addDataType(MemberClass.PLATINUM);
+                ci.addDataType(Sex.NOT_APPLICABLE);
                 if (!ci.multiDatatypeStateOccured) {
                     if (ci.countStateOccured) ci.changeState(ci.countOneDatatypeMenu);
                     else ci.changeState(ci.selectOneDatatypeMenu);
@@ -63,24 +61,6 @@ class TestSelectMemberClassMenu implements State {
                 }
                 return true;
             case 5:
-                ci.addDataType(MemberClass.DIAMOND);
-                if (!ci.multiDatatypeStateOccured) {
-                    if (ci.countStateOccured) ci.changeState(ci.countOneDatatypeMenu);
-                    else ci.changeState(ci.selectOneDatatypeMenu);
-                } else {
-                    ci.changeState(ci.selectOperationMenu);
-                }
-                return true;
-            case 6:
-                ci.addDataType(MemberClass.VIP);
-                if (!ci.multiDatatypeStateOccured) {
-                    if (ci.countStateOccured) ci.changeState(ci.countOneDatatypeMenu);
-                    else ci.changeState(ci.selectOneDatatypeMenu);
-                } else {
-                    ci.changeState(ci.selectOperationMenu);
-                }
-                return true;
-            case 7:
                 if (!ci.multiDatatypeStateOccured) {
                     if (ci.countStateOccured) ci.changeState(ci.countOneDatatypeMenu, false);
                     else ci.changeState(ci.selectOneDatatypeMenu, false);
@@ -89,7 +69,7 @@ class TestSelectMemberClassMenu implements State {
                     else ci.changeState(ci.selectDatatypeWithOperationMenu, false);
                 }
                 return true;
-            case 8:
+            case 6:
                 ci.abortAllOperations();
                 ci.changeState(ci.mainMenu);
                 return true;

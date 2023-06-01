@@ -1,6 +1,6 @@
-package database.internal;
+package database.api;
 
-import database.api.*;
+import database.internal.Cache;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -16,7 +16,6 @@ import static java.util.Collections.sort;
 public class ShoppingMallDatabase implements ShoppingMallDatabaseAPI {
     private final Connection connection;
     private final String driver = "com.mysql.cj.jdbc.Driver";
-    private final String database = "shopping_mall";
     private static ShoppingMallDatabase instance = null;
     private final Statement statement;
     private final MessageDigest md;
@@ -28,10 +27,9 @@ public class ShoppingMallDatabase implements ShoppingMallDatabaseAPI {
     private final ArrayList<DataType> notCalculatedDatatypes = new ArrayList<>();
     private final Cache cache = Cache.getInstance();
 
-    private ShoppingMallDatabase() throws SQLException, NoSuchAlgorithmException {
+    private ShoppingMallDatabase(String database, String username, String password) throws SQLException, NoSuchAlgorithmException {
         String url = "jdbc:mysql://localhost:3306/" + database + "?serverTimezone=UTC";
-        String user = "db_project";
-        this.connection = DriverManager.getConnection(url, user, user);
+        this.connection = DriverManager.getConnection(url, username, password);
         this.statement = connection.createStatement();
         this.md = MessageDigest.getInstance("SHA-256");
         this.sexWeight = new HashMap<>();
@@ -51,6 +49,7 @@ public class ShoppingMallDatabase implements ShoppingMallDatabaseAPI {
         memberClassWeight.put(MemberClass.DIAMOND, 8);
         memberClassWeight.put(MemberClass.VIP, 2);
     }
+
 
     @Override
     public void createTable() {
@@ -197,6 +196,17 @@ public class ShoppingMallDatabase implements ShoppingMallDatabaseAPI {
             calculateNot(dataTypes.get(0));
         }
         moveToTemp(fetchingFileName);
+        if (operations.size() == 0) {
+            try {
+                int i = 0;
+                while (Files.exists(Paths.get("buffer/" + fetchingFileName + i))){
+                    Files.copy(Paths.get("buffer/" + fetchingFileName + i), Paths.get("buffer/result" + i), StandardCopyOption.REPLACE_EXISTING);
+                    i++;
+                }
+            } catch (IOException ignored) {
+            }
+            return;
+        }
 
         dataTypes.remove(0);
         while (dataTypes.size() > 0){
@@ -291,17 +301,6 @@ public class ShoppingMallDatabase implements ShoppingMallDatabaseAPI {
             }
         }
         return Sex.MALE;
-    }
-
-    public static ShoppingMallDatabase getInstance() {
-        if (instance == null) {
-            try {
-                instance = new ShoppingMallDatabase();
-            } catch (SQLException | NoSuchAlgorithmException e) {
-                e.printStackTrace();
-            }
-        }
-        return instance;
     }
 
     private void createSexBitmap() throws SQLException {
@@ -399,6 +398,7 @@ public class ShoppingMallDatabase implements ShoppingMallDatabaseAPI {
             cache.releaseCache();
         }
     }
+
     private void calculateNot(DataType dataType){
         if(notCalculatedDatatypes.contains(dataType)) return;
         notCalculatedDatatypes.add(dataType);
@@ -424,7 +424,6 @@ public class ShoppingMallDatabase implements ShoppingMallDatabaseAPI {
         cache.releaseBuffer(bufferIndex, false);
         cache.releaseCache();
     }
-
     private ArrayList<User> selectFromBlock(long block, int index) throws SQLException {
         ArrayList<User> result = new ArrayList<>();
         PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM `users` WHERE `member_number` = ?;");
@@ -463,5 +462,21 @@ public class ShoppingMallDatabase implements ShoppingMallDatabaseAPI {
             }
         }
         return count;
+    }
+
+    public static ShoppingMallDatabase getInstance(String databaseName, String username, String password) {
+        if (instance == null) {
+            try {
+                instance = new ShoppingMallDatabase(databaseName, username, password);
+            } catch (SQLException | NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            }
+        }
+        return instance;
+    }
+
+    public static ShoppingMallDatabase getInstance() {
+        if (instance == null) throw new NullPointerException("ShoppingMallDatabase is not initialized");
+        return instance;
     }
 }

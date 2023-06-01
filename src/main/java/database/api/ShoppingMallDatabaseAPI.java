@@ -1,4 +1,4 @@
-package database.internal;
+package database.api;
 
 import java.util.ArrayList;
 

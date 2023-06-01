@@ -1,15 +1,17 @@
-package database.internal;
+package database.api;
 
 import java.util.ArrayList;
 
-public interface ShoppingMallDatabaseTestAPI extends ShoppingMallDatabaseAPI {
+public interface ShoppingMallDatabaseTestAPI {
+    public void insertData(int size);
+
     public boolean testCreatedTable();
 
     public boolean testInsertedData();
 
     public boolean testCreatedBitmapIndex();
 
-    public boolean testSelectedDatatype(DataType dataType, User[] output);
+    public boolean testSelectedDatatype(DataType dataType, ArrayList<User> output);
 
     public boolean testCountDatatype(DataType dataType, long output);
 

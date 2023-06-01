@@ -13,6 +13,7 @@ public class Cache {
 
     private Cache(){
         this.buffers = new ArrayList<>(CACHE_SIZE);
+        for(int i = 0; i < CACHE_SIZE; i++) buffers.add(new Buffer(BufferType.FREE, ""));
         this.lruIndex = new ArrayList<>(CACHE_SIZE);
         this.fileIndex = 0;
         this.bufferIndex = 0;
@@ -49,6 +50,7 @@ public class Cache {
         fileIndex = 0;
         bufferIndex = 0;
         for(Buffer buffer : buffers){
+            buffer.clearBuffer();
             buffer.setType(BufferType.FREE);
         }
     }
@@ -58,7 +60,7 @@ public class Cache {
         while (true){
             if(bufferIndex >= CACHE_SIZE) bufferIndex = 0;
             if(buffers.get(bufferIndex).getType() == BufferType.FREE){
-                buffers.get(bufferIndex).prepareBuffer(fileName);
+                buffers.get(bufferIndex).prepareBuffer(fileName + fileIndex);
                 buffers.get(bufferIndex).setType(BufferType.PINNED);
                 return bufferIndex;
             }
@@ -101,5 +103,11 @@ public class Cache {
         return instance;
     }
 
+    public int getIndex(int bufferIndex){
+        return fileIndex * Buffer.BLOCK_SIZE + buffers.get(bufferIndex).getBlockIndex() - 1;
+    }
 
+    public boolean isNextBlockNotAvailable(int bufferIndex){
+        return buffers.get(bufferIndex).isBufferFull();
+    }
 }

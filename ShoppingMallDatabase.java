@@ -9,14 +9,6 @@ import java.security.NoSuchAlgorithmException;
 import static java.util.Collections.sort;
 
 
-record BufferStatus(long block, int index, boolean write) {
-    BufferStatus(long block, int index) {
-        this(block, index, false);
-    }
-}
-
-
-
 public class ShoppingMallDatabase implements ShoppingMallDatabaseAPI {
     private final Connection connection;
     private final String driver = "com.mysql.cj.jdbc.Driver";
@@ -27,8 +19,7 @@ public class ShoppingMallDatabase implements ShoppingMallDatabaseAPI {
     private final MessageDigest md;
     private final Map<DataType, Integer> sexWeight;
     private final Map<DataType, Integer> memberClassWeight;
-    private final ArrayList<BufferStatus> buffers;
-    public static final String fileLocation = "buffer/";
+    private final Cache cache = Cache.getInstance();
     private final ArrayList<DataType> notCalculatedDatatypes = new ArrayList<>();
     private static final int CACHE_SIZE = 4;
     private static final int BUFFER_SIZE = 4;
