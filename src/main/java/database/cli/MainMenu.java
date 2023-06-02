@@ -50,6 +50,8 @@ public class MainMenu implements State {
                 ci.changeState(ci.selectDatatypeWithOperationMenu);
                 return true;
             case 7:
+                ci.countStateOccured = true;
+                ci.countDatatypeWithOperationMenu.setTrigger(false);
                 ci.changeState(ci.countDatatypeWithOperationMenu);
                 return true;
             case 8:

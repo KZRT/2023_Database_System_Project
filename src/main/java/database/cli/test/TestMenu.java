@@ -48,6 +48,7 @@ class TestMenu implements State {
                 ci.changeState(ci.selectDatatypeWithOperationMenu);
                 return true;
             case 7:
+                ci.countStateOccured = true;
                 ci.changeState(ci.countDatatypeWithOperationMenu);
                 return true;
             case 9:

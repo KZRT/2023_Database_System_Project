@@ -47,7 +47,7 @@ class CountDatatypeWithOperationMenu implements TriggerState {
             System.out.println("Selected Query: ");
             ArrayList<DataType> tempDataTypes = new ArrayList<>(ci.getDataTypes());
             ArrayList<Operation> tempOperations = new ArrayList<>(ci.getOperations());
-            String query = "SELECT * FROM `users` WHERE ";
+            String query = "SELECT COUNT(*) FROM `users` WHERE ";
             if (tempOperations.get(0) == Operation.NOT) {
                 query += "NOT ";
                 tempOperations.remove(0);
